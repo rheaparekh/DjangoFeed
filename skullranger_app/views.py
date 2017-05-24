@@ -7,7 +7,8 @@ from django.http import HttpResponse
 
 def index(request,auth_form=None,user_form=None):
   if request.user.is_authenticated():
-         return HttpResponse("Logged in")
+         user=request.user
+         return render(request,'feedpage.html',{'user':user})
   else:
          auth_form=auth_form or AuthenticateForm()
          user_form=user_form or UserCreateForm()
@@ -17,7 +18,7 @@ def login_view(request):
      if request.method=="POST":
          form = AuthenticateForm(data=request.POST)
          if form.is_valid():
-               login(reuqest,form.get_user())
+               login(request,form.get_user())
                return redirect('/')
          else:
                return index(request,auth_form=form)
@@ -31,8 +32,8 @@ def signup(request):
      user_form=UserCreateForm(data=request.POST)
      if request.method =='POST':
         if user_form.is_valid():
-            username=user_form.clean_username()
-            password=user_form.clean_passwordConfirmation
+            username=user_form.cleaned_data['username']
+            password=user_form.clean_password2()
             user_form.save()
             user=authenticate(username=username,password=password)
             login(request,user)
